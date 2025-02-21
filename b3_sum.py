@@ -21,8 +21,8 @@ def scan_directory(directory, output_file):
     """Recursively scan directory and compute b3sum using multiprocessing."""
     file_list = [os.path.join(root, f) for root, _, files in os.walk(directory) for f in files]
 
-    #num_workers = cpu_count()  # Get number of CPU cores
-    num_workers = 1
+    num_workers = cpu_count()  # Get number of CPU cores
+    #num_workers = 1
     print(f"Using {num_workers} parallel workers...")
 
     with Pool(num_workers) as pool:
