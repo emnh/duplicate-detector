@@ -7,10 +7,10 @@ import subprocess
 from multiprocessing import Pool, cpu_count
 from tqdm import tqdm
 
-def compute_xxhash(file_path):
-    """Compute xxHash using the system's xxh64sum command in a subprocess."""
+def compute_b3sum(file_path):
+    """Compute b3sum using the system's b3sum command in a subprocess."""
     try:
-        result = subprocess.run(['xxh64sum', file_path], capture_output=True, text=True)
+        result = subprocess.run(['b3sum', file_path], capture_output=True, text=True)
         if result.returncode == 0:
             return result.stdout.split()[0], file_path  # Extract hash and return as tuple
     except Exception as e:
@@ -18,10 +18,11 @@ def compute_xxhash(file_path):
     return None
 
 def scan_directory(directory, output_file):
-    """Recursively scan directory and compute xxHash using multiprocessing."""
+    """Recursively scan directory and compute b3sum using multiprocessing."""
     file_list = [os.path.join(root, f) for root, _, files in os.walk(directory) for f in files]
 
-    num_workers = cpu_count()  # Get number of CPU cores
+    #num_workers = cpu_count()  # Get number of CPU cores
+    num_workers = 1
     print(f"Using {num_workers} parallel workers...")
 
     with Pool(num_workers) as pool:
@@ -29,7 +30,7 @@ def scan_directory(directory, output_file):
             writer = csv.writer(csvfile, delimiter=';')
 
             # Use tqdm for progress bar while processing files in parallel
-            for result in tqdm(pool.imap_unordered(compute_xxhash, file_list), total=len(file_list), desc="Computing xxHash"):
+            for result in tqdm(pool.imap_unordered(compute_b3sum, file_list), total=len(file_list), desc="Computing b3sum"):
                 if result:
                     writer.writerow(result)
 
@@ -45,6 +46,6 @@ if __name__ == "__main__":
         print(f"Error: '{directory_to_scan}' is not a valid directory.")
         sys.exit(1)
 
-    output_csv = "xx_hashes.csv"
+    output_csv = "b3_hashes.csv"
     scan_directory(directory_to_scan, output_csv)
-    print(f"xxHash hashes written to {output_csv}")
+    print(f"b3sum hashes written to {output_csv}")
